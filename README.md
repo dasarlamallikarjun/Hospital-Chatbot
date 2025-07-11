@@ -1,141 +1,110 @@
-# 🏥 Hospital System RAG Chatbot
+# Hospital System RAG Chatbot
 
-An AI-powered chatbot for hospital data exploration, built with **LangChain**, **Neo4j**, **FastAPI**, and **Streamlit**. It supports natural language queries about hospitals, physicians, patients, insurance payers, visits, billing details, reviews, and wait times — using **retrieval-augmented generation (RAG)** over structured and unstructured data.
+This project implements a full-stack Retrieval-Augmented Generation (RAG) chatbot that answers natural language queries about a synthetic hospital system. It uses LangChain agents, a FastAPI backend, and a Streamlit frontend.
 
----
-
-## 🚀 Features
-
-- ⚙️ **ETL Pipeline**: Loads synthetic hospital data into a Neo4j graph database
-- 🧠 **LangChain Agent**: Combines Cypher querying with unstructured document search
-- 💬 **Chat Interface**: Streamlit-based frontend for interactive question answering
-- 📊 **Multi-modal Retrieval**: Structured (Neo4j) + Unstructured (docs, reviews)
-- 🔄 **RAG Pipeline**: Retrieval-Augmented Generation with intermediate explanation steps
-
----
-
-## 🧱 Architecture
-
-```plaintext
-User (Streamlit)
-   ⬇
-Chatbot Frontend (Python)
-   ⬇ HTTP Request
-FastAPI API (/hospital-rag-agent)
-   ⬇
-LangChain Agent Executor
-   ↙️               ↘️
-Neo4j (Cypher)   Document Retriever
-   ⬇
-Answer with reasoning steps
-```
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```
-Chatbot_api/
-│
-├── agents/
-│   └── hospital_rag_agent.py      # Main LangChain agent definition
-│
-├── chains/
-│   └── hospital_cypher_chain.py   # Custom Cypher chain logic
-│
-├── models/
-│   └── hospital_rag_query.py      # Pydantic models for request/response
-│
-├── utils/
-│   └── async_utils.py             # Retry logic wrapper
-│
-├── hospital_neo4j_etl/            # ETL loader for Neo4j graph
-├── chatbot_api/                   # FastAPI app code
-├── chatbot_frontend/              # Streamlit app UI
-│
-├── .env                           # Environment config
-├── docker-compose.yml             # Service orchestration
-├── requirements.txt               # Python dependencies
-└── README.md                      # 📘 This file
+├── chatbot_api/              # FastAPI backend with LangChain agents
+│   ├── agents/
+│   ├── chains/
+│   ├── models/
+│   ├── utils/
+│   ├── main.py
+│   └── requirements.txt
+├── chatbot_frontend/        # Streamlit user interface for chatting
+│   ├── main.py
+│   └── requirements.txt
+├── hospital_neo4j_etl/      # ETL pipeline to populate Neo4j with synthetic data
+│   ├── data/
+│   └── main.py
+├── docker-compose.yml       # Dockerized orchestration of services
+└── .env                     # Environment variables (API keys, connection info)
 ```
 
----
+## Features
 
-## 🧪 Example Questions
+- Retrieval-augmented QA over hospital, patient, physician, and billing data
+- Structured + unstructured knowledge integration via LangChain tools
+- Modular agent-executor with retry mechanism
+- Interactive chat UI with Streamlit using LLM responses
+- Dockerized environment with Neo4j, FastAPI, and Streamlit services
 
-- What is the current wait time at Wallace-Hamilton Hospital?
-- What is the average billing amount for Medicaid visits?
-- Which hospitals are in the hospital system?
-- Which physician has the shortest average visit duration?
-- What are patients saying about the nursing staff at Castaneda-Hardy?
+## How It Works
 
----
+1. **ETL Phase**: Loads synthetic CSV data into a Neo4j graph database.
+2. **Backend**: Uses LangChain agents to query Neo4j (Cypher) and unstructured data, exposing an API at `/hospital-rag-agent`.
+3. **Frontend**: A Streamlit chat UI sends questions to the backend and displays the results with explanations.
 
-## 🛠️ Setup Instructions
+## Running Locally
 
-### 1. Clone the Repository
+### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/hospital-chatbot.git
-cd hospital-chatbot
+git clone https://github.com/your-username/hospital-rag-chatbot.git
+cd hospital-rag-chatbot
 ```
 
-### 2. Configure Environment
+### Step 2: Set up the environment
 
-Create a `.env` file in the root:
+Create a `.env` file and add your credentials:
 
-```env
-OPENAI_API_KEY=sk-xxxxxxxxxxxx
-NEO4J_URI=bolt://your_neo4j_host:7687
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=yourpassword
 ```
+OPENAI_API_KEY=your-key-here
+LANGCHAIN_TRACING_V2=false
+LANGCHAIN_API_KEY=your-langsmith-key
+```
+### Step 3: Run the application
 
-### 3. Build and Run with Docker
+Make sure Docker is installed and running, then:
 
 ```bash
 docker-compose up --build
 ```
 
-- 🌐 Streamlit UI: `http://localhost:8501`
-- 🔗 FastAPI endpoint: `http://localhost:8000/hospital-rag-agent`
-- 🧠 Neo4j Browser: `http://localhost:7474`
+The following services will start:
+- Neo4j at `bolt://localhost:7687`
+- FastAPI backend at `http://localhost:8000`
+- Streamlit frontend at `http://localhost:8501`
 
----
+## API Endpoint
 
-## 📦 Tech Stack
+- `POST /hospital-rag-agent`
 
-| Layer           | Tool/Lib            |
-|----------------|---------------------|
-| LLM Backend     | OpenAI GPT          |
-| Framework       | LangChain           |
-| Graph DB        | Neo4j               |
-| API             | FastAPI             |
-| Frontend        | Streamlit           |
-| Deployment      | Docker Compose      |
+**Request Format**:
 
----
+```json
+{
+  "text": "Which physician has received the most reviews?"
+}
+```
 
-## 📌 Deployment on Streamlit Cloud (Optional)
+**Response Format**:
 
-Yes, you can deploy this project directly to [Streamlit Community Cloud](https://streamlit.io/cloud), **but note**:
+```json
+{
+  "output": "Dr. James Cooper has the most reviews.",
+  "intermediate_steps": [ "Step 1: Query Neo4j", "Step 2: Retrieve reviews", ... ]
+}
+```
 
-- Streamlit Cloud does **not support Docker Compose**
-- You must **split** the frontend and backend
-- Use `st.experimental_connection` or `requests.post()` to connect to an external backend (e.g., hosted on [Render](https://render.com), [Fly.io](https://fly.io), or [Railway](https://railway.app))
+## Requirements
 
-### Recommended Steps:
+- Python 3.10+
+- Docker and Docker Compose
+- Neo4j
+- OpenAI API Key
 
-1. Host `chatbot_api` (FastAPI backend) using:
-   - [Render](https://render.com)
-   - [Railway](https://railway.app)
+## Technologies Used
 
-2. In `chatbot_frontend`, update:
-   ```python
-   CHATBOT_URL = "https://your-fastapi-backend-url/hospital-rag-agent"
-   ```
+- LangChain (Agents, Chains)
+- FastAPI (Backend)
+- Streamlit (Frontend)
+- Neo4j (Graph DB)
+- OpenAI (LLMs)
+- Docker (Orchestration)
 
-3. Deploy `chatbot_frontend` on Streamlit Cloud:
-   - Push it to GitHub
-   - Go to: https://streamlit.io/cloud
-   - Connect your repo and deploy
+## Usage Notes
+
+- This project uses synthetic data and is for demonstration purposes.
+- To make it production-ready, ensure environment secrets are securely managed and the API is rate-limited.
