@@ -51,8 +51,21 @@ Create a `.env` file and add your credentials:
 
 ```
 OPENAI_API_KEY=your-key-here
-LANGCHAIN_TRACING_V2=false
-LANGCHAIN_API_KEY=your-langsmith-key
+NEO4J_URI=your_neo4j_bolt_or_http_uri
+NEO4J_USERNAME=your_neo4j_username
+NEO4J_PASSWORD=your_neo4j_password
+
+HOSPITALS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/hospitals.csv
+PAYERS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/payers.csv
+PHYSICIANS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/physicians.csv
+PATIENTS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/patients.csv
+VISITS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/visits.csv
+REVIEWS_CSV_PATH=https://raw.githubusercontent.com/hfhoffman1144/langchain_neo4j_rag_app/main/data/reviews.csv
+
+HOSPITAL_AGENT_MODEL=gpt-3.5-turbo-1106
+HOSPITAL_CYPHER_MODEL=gpt-3.5-turbo-1106
+HOSPITAL_QA_MODEL=gpt-3.5-turbo-0125
+
 ```
 ### Step 3: Run the application
 
@@ -67,26 +80,7 @@ The following services will start:
 - FastAPI backend at `http://localhost:8000`
 - Streamlit frontend at `http://localhost:8501`
 
-## API Endpoint
 
-- `POST /hospital-rag-agent`
-
-**Request Format**:
-
-```json
-{
-  "text": "Which physician has received the most reviews?"
-}
-```
-
-**Response Format**:
-
-```json
-{
-  "output": "Dr. James Cooper has the most reviews.",
-  "intermediate_steps": [ "Step 1: Query Neo4j", "Step 2: Retrieve reviews", ... ]
-}
-```
 
 ## Requirements
 
@@ -104,7 +98,3 @@ The following services will start:
 - OpenAI (LLMs)
 - Docker (Orchestration)
 
-## Usage Notes
-
-- This project uses synthetic data and is for demonstration purposes.
-- To make it production-ready, ensure environment secrets are securely managed and the API is rate-limited.
